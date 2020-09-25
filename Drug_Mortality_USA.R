@@ -39,6 +39,14 @@ Counties <- st_as_sf(maps::map("county", plot = FALSE, fill = TRUE)) %>%
   mutate_at(vars(State, County), str_to_title) %>%
   as_tibble()
 
+# Patch missing fips
+Counties %<>% mutate(fips = replace(fips))
+
+# Join the data to Counties
+Counties %<>% left_join(Drug %>%
+                          select(-County, -State),
+                        by=c("fips"="FIPS"))
+
 
 # Simple plot of State boundaries
 ggplot(USA) +
