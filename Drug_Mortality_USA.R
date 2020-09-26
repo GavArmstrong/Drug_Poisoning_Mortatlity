@@ -9,6 +9,8 @@ library(extrafont)
 font_import()
 
 library(ggplot2)
+library(gganimate)
+library(transformr)
 
 rm(list = ls())
 
@@ -40,26 +42,68 @@ Counties <- st_as_sf(maps::map("county", plot = FALSE, fill = TRUE)) %>%
   as_tibble()
 
 # Patch missing fips
-Counties %<>% mutate(fips = replace(fips))
+Counties %<>% mutate(fips = if_else(State == "Florida" & County == "Okaloosa",
+                                    as.integer(12091),
+                                    fips),
+                     fips = if_else(State == "Louisiana" & County == "St Martin",
+                                    as.integer(22099),
+                                    fips),
+                     fips = if_else(State == "North Carolina" & County == "Currituck",
+                                    as.integer(37053),
+                                    fips),
+                     fips = if_else(State == "Texas" & County == "Galveston",
+                                    as.integer(48167),
+                                    fips),
+                     fips = if_else(State == "Virginia" & County == "Accomack",
+                                    as.integer(51001),
+                                    fips),
+                     fips = if_else(State == "Washington" & County == "Pierce",
+                                    as.integer(53053),
+                                    fips),
+                     fips = if_else(State == "Washington" & County == "San Juan",
+                                    as.integer(53055),
+                                    fips))
 
 # Join the data to Counties
 Counties %<>% left_join(Drug %>%
                           select(-County, -State),
                         by=c("fips"="FIPS"))
 
+Counties %<>%
+  filter(Year %in% c(2017, 2018))
+
+
+# Simple plot of State boundaries
+ggplot(Counties) +
+  geom_sf(aes(geometry=geom,
+              fill = `Model-based Death Rate`),
+          lwd=0,
+          color="white") +
+  scale_fill_viridis() +
+  transition_time(Year) +
+  ease_aes('linear') +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        legend.position = "none")
+
 
 # Simple plot of State boundaries
 ggplot(USA) +
-  geom_sf(fill = "antiquewhite1",
+  geom_sf(fill = "#451954",
           lwd=0,
           color="black") +
-  geom_sf(data=States,
-          aes(geometry=geom),
-          lwd=0.2,
-          color="#002240") +
   geom_sf(data=Counties,
-          aes(geometry=geom),
-          lwd=0.1,
-          color="#4C974C")
+          aes(geometry=geom,
+              fill = `Model-based Death Rate`),
+          lwd=0,
+          color="white") +
+  scale_fill_viridis() +
+  transition_time(Year) +
+  ease_aes('linear') +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        legend.position = "none")
 
-ggsave("Cause of Death by County.png", device="png")
+ggsave("Drug Mortality by County.png", device="png")
