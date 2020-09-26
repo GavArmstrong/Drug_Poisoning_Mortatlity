@@ -70,40 +70,34 @@ Counties %<>% left_join(Drug %>%
                         by=c("fips"="FIPS"))
 
 Counties %<>%
-  filter(Year %in% c(2017, 2018))
+  filter(Year %in% c(2017, 2018)) %>%
+  mutate(Year = as.factor(Year))
 
 
 # Simple plot of State boundaries
-ggplot(Counties) +
-  geom_sf(aes(geometry=geom,
-              fill = `Model-based Death Rate`),
-          lwd=0,
-          color="white") +
-  scale_fill_viridis() +
-  transition_time(Year) +
-  ease_aes('linear') +
-  theme(axis.ticks = element_blank(),
-        axis.text = element_blank(),
-        panel.grid.major = element_blank(),
-        legend.position = "none")
-
-
-# Simple plot of State boundaries
-ggplot(USA) +
-  geom_sf(fill = "#451954",
-          lwd=0,
-          color="black") +
-  geom_sf(data=Counties,
+First_Plot <- ggplot() +
+  geom_sf(data = Counties,
           aes(geometry=geom,
-              fill = `Model-based Death Rate`),
-          lwd=0,
-          color="white") +
-  scale_fill_viridis() +
-  transition_time(Year) +
-  ease_aes('linear') +
-  theme(axis.ticks = element_blank(),
-        axis.text = element_blank(),
-        panel.grid.major = element_blank(),
-        legend.position = "none")
+              fill = `Model-based Death Rate`,
+              frame = Year))
+
+
+# Simple plot of State boundaries
+# ggplot(USA) +
+#   geom_sf(fill = "#451954",
+#           lwd=0,
+#           color="black") +
+#   geom_sf(data=Counties,
+#           aes(geometry=geom,
+#               fill = `Model-based Death Rate`),
+#           lwd=0,
+#           color="white") +
+#   scale_fill_viridis() +
+#   transition_time(Year) +
+#   ease_aes('linear') +
+#   theme(axis.ticks = element_blank(),
+#         axis.text = element_blank(),
+#         panel.grid.major = element_blank(),
+#         legend.position = "none")
 
 ggsave("Drug Mortality by County.png", device="png")
