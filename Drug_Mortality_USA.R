@@ -90,11 +90,22 @@ States %<>% left_join(Drug) %>%
   filter(Year %in% c(2003, 2018))
 
 # Simple plot of State boundaries
-First_Plot <- ggplot() +
-  geom_sf(data = States,
-          lwd = 0,
+anim <- ggplot(airquality, aes(Day, Temp)) +
+  geom_point(aes(colour = factor(Month))) +
+  transition_time(Day)
+
+First_Plot <- ggplot(data=States) +
+  geom_sf(lwd = 0,
           aes(geometry=geom,
-              fill = MBDR))
+              fill = MBDR)) +
+  scale_fill_viridis() +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        legend.position = "none") +
+  transition_time(Year)
+
+anim_save("First_Anim.gif", First_Plot)
 
 plot(First_Plot)
 
