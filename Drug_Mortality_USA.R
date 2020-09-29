@@ -75,12 +75,12 @@ County_Drug <- Counties %>%
          geom,
          MBDR = `Model-based Death Rate`)
 
-County_Drug %<>% filter(Year %in% c(2018))
+County_Drug %<>% filter(Year %in% c(2003, 2004, 2005, 2006, 2009, 2012, 2015, 2018))
 
 
 # Plotting the data
 First_Plot <- ggplot(data=USA) +
-  geom_sf(fill = "antiquewhite1",
+  geom_sf(fill = "#472A7A",
           lwd=0,
           color="black") +
   geom_sf(data=County_Drug,
@@ -89,21 +89,23 @@ First_Plot <- ggplot(data=USA) +
           lwd=0,
           color=NA) +
   scale_fill_viridis() +
+  ggtitle("Drug Mortality Rate ({frame_time})") +
   theme(axis.ticks = element_blank(),
         axis.text = element_blank(),
         panel.grid.major = element_blank(),
         panel.background = element_rect(fill = "#000f0e"),
         plot.background = element_rect(fill = "#000f0e"),
-        legend.position = "none")
-
-
-+
+        plot.title = element_text(color="white",
+                                  size=20),
+        legend.position = "none") +
   transition_time(Year)
 
 Timer <- createTimer(precision = "ms")
 Timer$start("Event 1")
 
-anim_save("First_Anim.gif", First_Plot)
+# We have 16 years of data
+animate(First_Plot, width=1800, height=1800, duration=4, fps=10, nframes=32)
+anim_save("First_Anim.gif")
 
 Timer$stop("Event 1")
 
