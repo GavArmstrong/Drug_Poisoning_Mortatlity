@@ -23,7 +23,7 @@ rm(list = ls())
 Drug <- read_csv(file="NCHS_-_Drug_Poisoning_Mortality_by_County__United_States.csv")
 
 # Use the Black and White as a base for maps
-theme_set(theme_bw())
+#theme_set(theme_bw())
 
 # Read USA multipolygons from the Maps package
 USA <- st_as_sf(maps::map("usa", plot=FALSE, fill=TRUE)) %>%
@@ -73,10 +73,27 @@ County_Drug <- Counties %>%
             by=c("fips"="FIPS")) %>%
   select(Year,
          geom,
-         MBDR = `Model-based Death Rate`)
+         MBDR = `Model-based Death Rate`) %>%
+  mutate(MBDR = as.numeric(MBDR))
 
-County_Drug %<>% filter(Year %in% c(2003, 2004, 2005, 2006, 2009, 2012, 2015, 2018))
+County_Drug %<>% filter(Year %in% c(2003,
+                                    # 2004,
+                                    # 2005,
+                                    # 2006,
+                                    # 2007,
+                                    # 2008,
+                                    # 2009,
+                                    # 2010,
+                                    # 2011,
+                                    # 2012,
+                                    # 2013,
+                                    # 2014,
+                                    # 2015,
+                                    # 2016,
+                                    # 2017,
+                                    2018))
 
+limit <- c(min(County_Drug$MBDR)-20.0, max(County_Drug$MBDR))
 
 # Plotting the data
 First_Plot <- ggplot(data=USA) +
@@ -88,7 +105,10 @@ First_Plot <- ggplot(data=USA) +
               fill = MBDR),
           lwd=0,
           color=NA) +
-  scale_fill_viridis() +
+  scale_fill_distiller(direction=1,
+                       palette="GnBu",
+                       type="div",
+                       limit=limit) +
   ggtitle("Drug Mortality Rate ({frame_time})") +
   theme(axis.ticks = element_blank(),
         axis.text = element_blank(),
@@ -104,7 +124,10 @@ Timer <- createTimer(precision = "ms")
 Timer$start("Event 1")
 
 # We have 16 years of data
-animate(First_Plot, width=1800, height=1800, duration=4, fps=10, nframes=32)
+animate(First_Plot, width=1800, height=1800,
+        duration=4, fps=4, nframes=16,
+        start_pause=5, end_pause=5)
+
 anim_save("First_Anim.gif")
 
 Timer$stop("Event 1")
