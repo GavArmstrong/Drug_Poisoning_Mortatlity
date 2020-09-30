@@ -11,7 +11,9 @@ library(gganimate)
 
 library(timeR)
 
-#library(extrafont)
+library(RColorBrewer)
+
+library(extrafont)
 #font_import()
 
 rm(list = ls())
@@ -29,11 +31,11 @@ Drug <- read_csv(file="NCHS_-_Drug_Poisoning_Mortality_by_County__United_States.
 USA <- st_as_sf(maps::map("usa", plot=FALSE, fill=TRUE)) %>%
   mutate(ID = str_to_title(ID))
 
-# # Read State multipolygons from the Maps package
-# States <- st_as_sf(maps::map("state", plot = FALSE, fill = TRUE)) %>%
-#   mutate(ID = str_to_title(ID)) %>%
-#   as_tibble() %>%
-#   rename(State = ID)
+# Read State multipolygons from the Maps package
+States <- st_as_sf(maps::map("state", plot = FALSE, fill = TRUE)) %>%
+  mutate(ID = str_to_title(ID)) %>%
+  as_tibble() %>%
+  rename(State = ID)
 
 # Read County multipolygons from the Maps package
 Counties <- st_as_sf(maps::map("county", plot = FALSE, fill = TRUE)) %>%
@@ -91,33 +93,51 @@ County_Drug %<>% filter(Year %in% c(2003,
                                     # 2015,
                                     # 2016,
                                     # 2017,
-                                    2018))
+                                    2018)) %>%
+  as_tibble()
 
-limit <- c(min(County_Drug$MBDR)-20.0, max(County_Drug$MBDR))
+# Customize the palette colors
+my_palette <- brewer.pal(n=9, name="GnBu")[4:9]
+my_palette[6] <- "#102535"
+my_palette[7] <- "#01101e"
+
+#limit <- c(min(County_Drug$MBDR)-20.0, max(County_Drug$MBDR))
 
 # Plotting the data
 First_Plot <- ggplot(data=USA) +
-  geom_sf(fill = "#472A7A",
+  geom_sf(fill = my_palette[1],
           lwd=0,
           color="black") +
   geom_sf(data=County_Drug,
-          aes(geometry=geom,
-              fill = MBDR),
-          lwd=0,
-          color=NA) +
-  scale_fill_distiller(direction=1,
-                       palette="GnBu",
-                       type="div",
-                       limit=limit) +
-  ggtitle("Drug Mortality Rate ({frame_time})") +
+                        aes(geometry=geom,
+                            fill = MBDR),
+                        lwd=0,
+                        color=NA) +
+  scale_fill_gradientn(colors=my_palette) +
+  geom_sf(data=States,
+          fill=NA,
+          lwd=1,
+          aes(geometry=geom)) +
+   ggtitle("Drug Poisoning Mortality Rate by County ({frame_time})",
+           subtitle = "Source: https://www.cdc.gov/nchs/data-visualization/drug-poisoning-mortality/") +
   theme(axis.ticks = element_blank(),
         axis.text = element_blank(),
         panel.grid.major = element_blank(),
-        panel.background = element_rect(fill = "#000f0e"),
-        plot.background = element_rect(fill = "#000f0e"),
+        panel.background = element_rect(fill = "#0e231f"),
+        plot.background = element_rect(fill = "#0e231f"),
+        legend.text = element_text(color="white",
+                                   size=30),
+        legend.title = element_blank(),
+        legend.justification = c(1,0),
+        legend.position = c(0.95,0.05),
+        legend.background = element_blank(),
         plot.title = element_text(color="white",
-                                  size=20),
-        legend.position = "none") +
+                                  #family="Arial",
+                                  size=50),
+        plot.subtitle = element_text(color="white",
+                                     #family="Arial",
+                                     size=30,
+                                     vjust=-1)) +
   transition_time(Year)
 
 Timer <- createTimer(precision = "ms")
