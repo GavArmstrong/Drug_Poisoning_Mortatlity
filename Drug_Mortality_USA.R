@@ -132,7 +132,7 @@ First_Plot <- ggplot(data=USA) +
         legend.position = c(0.95,0.05),
         legend.background = element_blank(),
         plot.title = element_text(color="white",
-                                  #family="Arial",
+                                  family="Arial",
                                   size=50),
         plot.subtitle = element_text(color="white",
                                      #family="Arial",
