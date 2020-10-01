@@ -113,31 +113,41 @@ First_Plot <- ggplot(data=USA) +
                             fill = MBDR),
                         lwd=0,
                         color=NA) +
-  scale_fill_gradientn(colors=my_palette) +
+  scale_fill_gradientn(colors=my_palette,
+                       labels=list("0", "25", "50", "75", "100")) +
+  guides(fill = guide_colorbar(ticks=FALSE)) +
   geom_sf(data=States,
           fill=NA,
           lwd=1,
           aes(geometry=geom)) +
    ggtitle("Drug Poisoning Mortality Rate by County ({frame_time})",
            subtitle = "Source: https://www.cdc.gov/nchs/data-visualization/drug-poisoning-mortality/") +
+  labs(fill="Deaths per\n100,000 people") +
   theme(axis.ticks = element_blank(),
         axis.text = element_blank(),
         panel.grid.major = element_blank(),
         panel.background = element_rect(fill = "#0e231f"),
         plot.background = element_rect(fill = "#0e231f"),
+        legend.title = element_text(color="white",
+                                    family="Arial Rounded MT Bold",
+                                    size=30),
         legend.text = element_text(color="white",
-                                   size=30),
-        legend.title = element_blank(),
+                                   family="Arial",
+                                   size=30,
+                                   hjust=1),
+        legend.key.height = unit(2.1,"cm"),
+        legend.key.width = unit(1.3,"cm"),
         legend.justification = c(1,0),
-        legend.position = c(0.95,0.05),
+        legend.position = c(0.98,0.04),
         legend.background = element_blank(),
         plot.title = element_text(color="white",
-                                  family="Arial",
+                                  family="Arial Rounded MT Bold",
                                   size=50),
         plot.subtitle = element_text(color="white",
-                                     #family="Arial",
+                                     family="Arial",
                                      size=30,
-                                     vjust=-1)) +
+                                     vjust=-1),
+        plot.margin = unit(c(1,1,1,1), "cm")) +
   transition_time(Year)
 
 Timer <- createTimer(precision = "ms")
@@ -151,23 +161,5 @@ animate(First_Plot, width=1800, height=1800,
 anim_save("First_Anim.gif")
 
 Timer$stop("Event 1")
-
-# Simple plot of State boundaries
-# ggplot(USA) +
-#   geom_sf(fill = "#451954",
-#           lwd=0,
-#           color="black") +
-#   geom_sf(data=Counties,
-#           aes(geometry=geom,
-#               fill = `Model-based Death Rate`),
-#           lwd=0,
-#           color="white") +
-#   scale_fill_viridis() +
-#   transition_time(Year) +
-#   ease_aes('linear') +
-#   theme(axis.ticks = element_blank(),
-#         axis.text = element_blank(),
-#         panel.grid.major = element_blank(),
-#         legend.position = "none")
 
 #ggsave("Drug Mortality by County.png", device="png")
