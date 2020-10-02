@@ -79,20 +79,20 @@ County_Drug <- Counties %>%
   mutate(MBDR = as.numeric(MBDR))
 
 County_Drug %<>% filter(Year %in% c(2003,
-                                    # 2004,
-                                    # 2005,
-                                    # 2006,
-                                    # 2007,
-                                    # 2008,
-                                    # 2009,
-                                    # 2010,
-                                    # 2011,
-                                    # 2012,
-                                    # 2013,
-                                    # 2014,
-                                    # 2015,
-                                    # 2016,
-                                    # 2017,
+                                    2004,
+                                    2005,
+                                    2006,
+                                    2007,
+                                    2008,
+                                    2009,
+                                    2010,
+                                    2011,
+                                    2012,
+                                    2013,
+                                    2014,
+                                    2015,
+                                    2016,
+                                    2017,
                                     2018)) %>%
   as_tibble()
 
@@ -155,10 +155,10 @@ Timer$start("Event 1")
 
 # We have 16 years of data
 animate(First_Plot, width=1800, height=1800,
-        duration=4, fps=4, nframes=16,
-        start_pause=5, end_pause=5)
+        duration=6, fps=5, nframes=20,
+        start_pause=5, end_pause=9)
 
-anim_save("First_Anim.gif")
+anim_save("Drug Mortality by US County.gif")
 
 Timer$stop("Event 1")
 
