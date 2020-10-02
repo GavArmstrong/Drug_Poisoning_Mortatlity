@@ -1,7 +1,5 @@
 library(tidyverse)
 library(magrittr)
-library(readxl)
-library(viridis)
 
 library(ggplot2)
 library(sf)
@@ -83,15 +81,15 @@ County_Drug %<>% filter(Year %in% c(2003,
                                     2005,
                                     2006,
                                     2007,
-                                    2008,
-                                    2009,
-                                    2010,
-                                    2011,
-                                    2012,
-                                    2013,
-                                    2014,
-                                    2015,
-                                    2016,
+                                    # 2008,
+                                    # 2009,
+                                    # 2010,
+                                    # 2011,
+                                    # 2012,
+                                    # 2013,
+                                    # 2014,
+                                    # 2015,
+                                    # 2016,
                                     2017,
                                     2018)) %>%
   as_tibble()
@@ -113,8 +111,9 @@ First_Plot <- ggplot(data=USA) +
                             fill = MBDR),
                         lwd=0,
                         color=NA) +
-  scale_fill_gradientn(colors=my_palette,
-                       labels=list("0", "25", "50", "75", "100")) +
+  scale_fill_gradientn(colors=my_palette
+                       #labels=list("0", "25", "50", "75", "100")
+                       ) +
   guides(fill = guide_colorbar(ticks=FALSE)) +
   geom_sf(data=States,
           fill=NA,
@@ -155,7 +154,7 @@ Timer$start("Event 1")
 
 # We have 16 years of data
 animate(First_Plot, width=1800, height=1800,
-        duration=6, fps=5, nframes=20,
+        duration=6, fps=5,
         start_pause=5, end_pause=9)
 
 anim_save("Drug Mortality by US County.gif")

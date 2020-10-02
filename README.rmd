@@ -6,15 +6,101 @@ output: md_document
 ```{r include=FALSE}
 library(tidyverse)
 library(magrittr)
-library(readxl)
 ```
 
 # US Drug Poisoning Mortatlity by County 2003 - 2018
 
 How have drug poisoning mortatlity rates in the US changed over recent years?
 
-The Center for Disease Control (CDC) provides estimates for the drug poisoning mortality rates in the US on national, state and county levels (https://www.cdc.gov/nchs/data-visualization/drug-poisoning-mortality/).
+The Center for Disease Control (CDC) provides estimates for the drug poisoning mortality rates in the US on national, state, and county levels (https://www.cdc.gov/nchs/data-visualization/drug-poisoning-mortality/).
+
+```{r include=FALSE}
+Drug_Mort <- read_csv(file="NCHS_-_Drug_Poisoning_Mortality_by_County__United_States.csv")
+```
+```{r echo=FALSE}
+head(Drug_Mort)
+```
 
 We want an effective method of displaying this data so that trends in drug mortatlities become apparent. One way to achieve this is using a choropleth (a thematic map displaying statistical information). There are many different packages capable of creating choropleths in R.
 
-In this case we want to display the counties of the USA over a specific time period.
+In this case we will display the drug mortatlity rate ("Model-based Death Rate") for each county of the USA over the period 2003 to 2018 using the county maps available in the "maps" package.
+
+```{r eval=FALSE}
+Counties <- st_as_sf(maps::map("county", plot = FALSE, fill = TRUE)) %>%
+  mutate(ID = as.character(ID)) %>%
+  left_join(maps::county.fips, by=c("ID"="polyname"))
+```
+
+Using the county FIPS numbers available in both tables we can join the drug mortality rates to the map data:
+
+```{r eval=FALSE}
+County_Drug <- Counties %>%
+  left_join(Drug %>%
+              select(-County, -State),
+            by=c("fips"="FIPS")) %>%
+  select(Year,
+         geom,
+         MBDR = `Model-based Death Rate`)
+```
+
+Now that we combined our data we can start to form our plot.
+
+```{r eval=FALSE}
+Main_Plot <- ggplot(data=USA) +
+  geom_sf(fill = my_palette[1],
+          lwd=0,
+          color="black") +
+  geom_sf(data=County_Drug,
+                        aes(geometry=geom,
+                            fill = MBDR),
+                        lwd=0,
+                        color=NA) +
+  scale_fill_gradientn(colors=my_palette) +
+  guides(fill = guide_colorbar(ticks=FALSE)) +
+  geom_sf(data=States,
+          fill=NA,
+          lwd=1,
+          aes(geometry=geom)) +
+   ggtitle("Drug Poisoning Mortality Rate by County ({frame_time})",
+           subtitle = "Source: https://www.cdc.gov/nchs/data-visualization/drug-poisoning-mortality/") +
+  labs(fill="Deaths per\n100,000 people") +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_rect(fill = "#0e231f"),
+        plot.background = element_rect(fill = "#0e231f"),
+        legend.title = element_text(color="white",
+                                    family="Arial Rounded MT Bold",
+                                    size=30),
+        legend.text = element_text(color="white",
+                                   family="Arial",
+                                   size=30,
+                                   hjust=1),
+        legend.key.height = unit(2.1,"cm"),
+        legend.key.width = unit(1.3,"cm"),
+        legend.justification = c(1,0),
+        legend.position = c(0.98,0.04),
+        legend.background = element_blank(),
+        plot.title = element_text(color="white",
+                                  family="Arial Rounded MT Bold",
+                                  size=50),
+        plot.subtitle = element_text(color="white",
+                                     family="Arial",
+                                     size=30,
+                                     vjust=-1),
+        plot.margin = unit(c(1,1,1,1), "cm")) +
+  transition_time(Year)
+```
+
+We want to make a gif from these plots that transitions over the Year variable. This can be achieved using the "animate"-function from the gganimate-package.
+
+```{r eval=FALSE}
+animate(Main_Plot, width=1800, height=1800,
+        duration=6, fps=5,
+        start_pause=5, end_pause=9)
+
+anim_save("Drug Mortality by US County.gif")
+```
+
+<img src="Drug Mortality by US County.gif"/>
+
